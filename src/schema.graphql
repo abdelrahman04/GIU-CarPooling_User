@@ -1,0 +1,114 @@
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  giuId: String
+  phone: String
+  gender: Boolean!
+  isAdmin: Boolean!
+  isEmailVerified: Boolean!
+  activated: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  car: Car
+  driver: Driver
+}
+
+type Driver {
+  id: ID!
+  userId: ID!
+  approved: Boolean!
+  car: CarDetails
+}
+
+type CarDetails {
+  id: ID!
+  licensePlate: String!
+  year: Int!
+  vehicleName: String!
+  passengerSeats: Int!
+  licensePicture: String
+  driverId: ID
+}
+
+type Car {
+  id: ID!
+  make: String!
+  model: String!
+  year: Int!
+  color: String!
+  licensePlate: String!
+  seats: Int!
+  userId: ID!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type AuthResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+type Message {
+  message: String!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  giuId: String
+  phone: String
+  gender: Boolean!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input VerificationInput {
+  email: String!
+  code: String!
+}
+
+input CarInput {
+  make: String!
+  model: String!
+  year: Int!
+  color: String!
+  licensePlate: String!
+  seats: Int!
+}
+
+input CarDetailsInput {
+  licensePlate: String!
+  year: Int!
+  vehicleName: String!
+  passengerSeats: Int!
+  licensePicture: String
+}
+
+type Query {
+  me: User!
+  myCar: Car
+  myDriverCar: CarDetails
+}
+
+type Mutation {
+  register(input: RegisterInput!): Message!
+  verifyRegistration(input: VerificationInput!): Message!
+  login(input: LoginInput!): Message!
+  verifyLogin(input: VerificationInput!): AuthResponse!
+  refreshToken(token: String!): AuthResponse!
+  revokeToken(token: String!): Boolean!
+  addCar(input: CarInput!): Car!
+  updateCar(input: CarInput!): Car!
+  deleteCar: Boolean!
+  addDriverCar(input: CarDetailsInput!): CarDetails!
+  updateDriverCar(input: CarDetailsInput!): CarDetails!
+  deleteDriverCar: Boolean!
+} 
