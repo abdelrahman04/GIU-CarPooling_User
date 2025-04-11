@@ -8,6 +8,12 @@ const resolvers = {
     },
     validateRefreshToken: async (_, { token }) => {
       return authService.validateRefreshToken(token);
+    },
+    isAdmin: async (_, { token }) => {
+      return authService.isAdmin(token);
+    },
+    isDriver: async (_, { token }) => {
+      return authService.isDriver(token);
     }
   },
 
@@ -28,12 +34,12 @@ const resolvers = {
       return usersService.verifyLogin(input);
     },
 
-    refreshToken: async (_, { input }) => {
-      return usersService.refreshToken(input.token);
+    refreshToken: async (_, { token }) => {
+      return usersService.refreshToken(token);
     },
 
-    revokeToken: async (_, { input }) => {
-      return usersService.revokeToken(input.token);
+    revokeToken: async (_, { token }) => {
+      return usersService.revokeToken(token);
     },
 
     validateAccessToken: async (_, { input }) => {

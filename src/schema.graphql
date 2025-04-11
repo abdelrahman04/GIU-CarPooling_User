@@ -55,6 +55,8 @@ type Message {
   message: String!
 }
 
+scalar Upload
+
 input RegisterInput {
   email: String!
   password: String!
@@ -96,6 +98,17 @@ type Query {
   me: User!
   myCar: Car
   myDriverCar: CarDetails
+  downloadLicense: LicenseFile!
+  validateToken(token: String!): User!
+  validateRefreshToken(token: String!): Boolean!
+  isAdmin(token: String!): Boolean!
+  isDriver(token: String!): Boolean!
+}
+
+type LicenseFile {
+  fileContent: String!
+  filename: String!
+  mimeType: String!
 }
 
 type Mutation {
@@ -105,10 +118,17 @@ type Mutation {
   verifyLogin(input: VerificationInput!): AuthResponse!
   refreshToken(token: String!): AuthResponse!
   revokeToken(token: String!): Boolean!
+  validateAccessToken(input: TokenInput!): Boolean!
   addCar(input: CarInput!): Car!
   updateCar(input: CarInput!): Car!
   deleteCar: Boolean!
-  addDriverCar(input: CarDetailsInput!): CarDetails!
-  updateDriverCar(input: CarDetailsInput!): CarDetails!
+  addDriverCar(input: CarDetailsInput!): Driver!
+  updateDriverCar(input: CarDetailsInput!): Driver!
   deleteDriverCar: Boolean!
+  uploadLicense(file: Upload!): CarDetails!
+  activateDriver(userId: ID!): Driver!
+}
+
+input TokenInput {
+  token: String!
 } 

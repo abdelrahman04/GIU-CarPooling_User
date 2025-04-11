@@ -1,10 +1,8 @@
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
+import prisma from '../lib/prisma.js';
 
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
@@ -18,7 +16,7 @@ class JWTService {
         isAdmin: user.isAdmin 
       },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '1d' }
     );
   }
 
@@ -43,13 +41,27 @@ class JWTService {
 
   async verifyAccessToken(token) {
     try {
+      console.log('Verifying access token...');
       const decoded = jwt.verify(token, JWT_SECRET);
+      console.log('Token decoded:', decoded);
+      
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
       });
-      if (!user) throw new Error('User not found');
+      console.log('User found:', user ? 'Yes' : 'No');
+      
+      if (!user) {
+        console.log('User not found for ID:', decoded.userId);
+        throw new Error('User not found');
+      }
       return user;
     } catch (error) {
+      console.log('Token verification error:', error.message);
+      if (error.name === 'JsonWebTokenError') {
+        console.log('JWT Error:', error.message);
+      } else if (error.name === 'TokenExpiredError') {
+        console.log('Token expired');
+      }
       throw new Error('Invalid access token');
     }
   }

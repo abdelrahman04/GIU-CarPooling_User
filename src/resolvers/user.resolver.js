@@ -3,11 +3,13 @@ import prisma from '../lib/prisma.js';
 
 const resolvers = {
   Query: {
-    me: async (_, __, { req }) => {
-      if (!req.user) {
+    me: async (_, __, context) => {
+      console.log(context);
+      console.log(context.user);
+      if (!context || !context.user) {
         throw new Error('Not authenticated');
       }
-      return usersService.getProfile(req.user.id);
+      return usersService.getProfile(context.user.id);
     }
   },
 

@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { jwtService } from './jwt.service.js';
+import prisma from '../lib/prisma.js';
 
 dotenv.config();
 
-const prisma = new PrismaClient();
 const VERIFICATION_CODE_EXPIRY = 15 * 60 * 1000; // 15 minutes
 
 class AuthService {
@@ -52,6 +52,45 @@ class AuthService {
 
   async comparePasswords(password, hashedPassword) {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  async validateToken(token) {
+    try {
+      const user = await jwtService.verifyAccessToken(token);
+      return user;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
+  }
+
+  async validateRefreshToken(token) {
+    try {
+      const decoded = await jwtService.verifyRefreshToken(token);
+      return decoded;
+    } catch (error) {
+      throw new Error('Invalid refresh token');
+    }
+  }
+
+  async isAdmin(token) {
+    try {
+      const user = await this.validateToken(token);
+      return user.isAdmin;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async isDriver(token) {
+    try {
+      const user = await this.validateToken(token);
+      const driver = await prisma.driver.findUnique({
+        where: { userId: user.id }
+      });
+      return !!driver;
+    } catch (error) {
+      return false;
+    }
   }
 }
 

@@ -1,42 +1,61 @@
 import { driverService } from '../services/driver.service.js';
+import prisma from '../lib/prisma.js';
 
 const resolvers = {
   Query: {
-    myDriverCar: async (_, __, { req }) => {
-      if (!req.user) {
+    myDriverCar: async (_, __, context) => {
+      if (!context || !context.user) {
         throw new Error('Not authenticated');
       }
-      return driverService.getDriverCar(req.user.id);
+      const driver = await driverService.getDriverCar(context.user.id);
+      return driver.car;
+    },
+    
+    downloadLicense: async (_, __, context) => {
+      if (!context || !context.user) {
+        throw new Error('Not authenticated');
+      }
+      return driverService.downloadLicense(context.user.id);
     }
   },
 
   Mutation: {
-    addDriverCar: async (_, { input }, { req }) => {
-      if (!req.user) {
+    activateDriver: async (_, { userId }, context) => {
+      if (!context || !context.user) {
         throw new Error('Not authenticated');
       }
-      return driverService.addDriverCar(req.user.id, input);
+      if (!context.user.isAdmin) {
+        throw new Error('Not authorized: Admin access required');
+      }
+      return driverService.activateDriver(userId);
     },
 
-    updateDriverCar: async (_, { input }, { req }) => {
-      if (!req.user) {
+    addDriverCar: async (_, { input }, context) => {
+      if (!context || !context.user) {
         throw new Error('Not authenticated');
       }
-      return driverService.updateDriverCar(req.user.id, input);
+      return await driverService.addDriverCar(context.user.id, input);
     },
 
-    deleteDriverCar: async (_, __, { req }) => {
-      if (!req.user) {
+    updateDriverCar: async (_, { input }, context) => {
+      if (!context || !context.user) {
         throw new Error('Not authenticated');
       }
-      return driverService.deleteDriverCar(req.user.id);
+      return await driverService.updateDriverCar(context.user.id, input);
     },
 
-    uploadLicense: async (_, { file }, { req }) => {
-      if (!req.user) {
+    deleteDriverCar: async (_, __, context) => {
+      if (!context || !context.user) {
         throw new Error('Not authenticated');
       }
-      return driverService.uploadLicense(req.user.id, file);
+      return driverService.deleteDriverCar(context.user.id);
+    },
+
+    uploadLicense: async (_, { file }, context) => {
+      if (!context || !context.user) {
+        throw new Error('Not authenticated');
+      }
+      return driverService.uploadLicense(context.user.id, file);
     }
   },
 

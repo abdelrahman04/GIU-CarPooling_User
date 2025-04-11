@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
+import { BadRequestException, NotFoundException } from '../exceptions/index.js';
 
 class CarService {
   async addCar(userId, input) {
