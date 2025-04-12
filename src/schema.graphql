@@ -11,7 +11,6 @@ type User {
   activated: Boolean!
   createdAt: String!
   updatedAt: String!
-  car: Car
   driver: Driver
 }
 
@@ -30,19 +29,6 @@ type CarDetails {
   passengerSeats: Int!
   licensePicture: String
   driverId: ID
-}
-
-type Car {
-  id: ID!
-  make: String!
-  model: String!
-  year: Int!
-  color: String!
-  licensePlate: String!
-  seats: Int!
-  userId: ID!
-  createdAt: String!
-  updatedAt: String!
 }
 
 type AuthResponse {
@@ -77,15 +63,6 @@ input VerificationInput {
   code: String!
 }
 
-input CarInput {
-  make: String!
-  model: String!
-  year: Int!
-  color: String!
-  licensePlate: String!
-  seats: Int!
-}
-
 input CarDetailsInput {
   licensePlate: String!
   year: Int!
@@ -96,7 +73,6 @@ input CarDetailsInput {
 
 type Query {
   me: User!
-  myCar: Car
   myDriverCar: CarDetails
   downloadLicense: LicenseFile!
   validateToken(token: String!): User!
@@ -119,11 +95,8 @@ type Mutation {
   refreshToken(token: String!): AuthResponse!
   revokeToken(token: String!): Boolean!
   validateAccessToken(input: TokenInput!): Boolean!
-  addCar(input: CarInput!): Car!
-  updateCar(input: CarInput!): Car!
-  deleteCar: Boolean!
-  addDriverCar(input: CarDetailsInput!): Driver!
-  updateDriverCar(input: CarDetailsInput!): Driver!
+  addDriverCar(input: CarDetailsInput!): CarDetails!
+  updateDriverCar(input: CarDetailsInput!): CarDetails!
   deleteDriverCar: Boolean!
   uploadLicense(file: Upload!): CarDetails!
   activateDriver(userId: ID!): Driver!

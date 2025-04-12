@@ -58,7 +58,7 @@ class DriverService {
       include: { car: true }
     });
 
-    return driver;
+    return driver.car;
   }
 
   async updateDriverCar(userId, carData) {
@@ -87,7 +87,7 @@ class DriverService {
     });
     console.log('updatedDriver');
     console.log(updatedDriver);
-    return updatedDriver;
+    return updatedDriver.car;
   }
 
   async deleteDriverCar(userId) {

@@ -40,11 +40,6 @@ const resolvers = {
   },
 
   User: {
-    car: async (parent) => {
-      return prisma.car.findUnique({
-        where: { userId: parent.id }
-      });
-    },
     driver: async (parent) => {
       return prisma.driver.findUnique({
         where: { userId: parent.id },

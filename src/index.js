@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import { authMiddleware } from './middleware/auth.js';
 import multer from 'multer';
 import { mkdir } from 'fs/promises';
+import prisma from './lib/prisma.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,8 +46,41 @@ app.post('/upload-license', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
     
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const filePath = `/uploads/licenses/${req.file.filename}`;
-    res.json({ path: filePath });
+
+    // Update the driver's car with the new license picture path
+    const driver = await prisma.driver.findUnique({
+      where: { userId: req.user.id },
+      include: { car: true }
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Driver not found' });
+    }
+
+    if (!driver.car) {
+      return res.status(404).json({ error: 'Car not found' });
+    }
+
+    await prisma.driver.update({
+      where: { userId: req.user.id },
+      data: {
+        car: {
+          update: {
+            licensePicture: filePath
+          }
+        }
+      }
+    });
+
+    res.json({ 
+      path: filePath,
+      message: 'License uploaded and updated successfully'
+    });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Upload failed' });
