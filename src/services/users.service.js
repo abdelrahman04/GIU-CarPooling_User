@@ -106,7 +106,7 @@ class UsersService {
 
     // Verify code
     await authService.verifyCode(email, code);
-
+    console.log(user);
     // Generate tokens
     const accessToken = await jwtService.generateAccessToken(user);
     const refreshToken = await jwtService.generateRefreshToken(user);
