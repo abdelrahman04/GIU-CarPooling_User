@@ -9,12 +9,18 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 class JWTService {
   async generateAccessToken(user) {
+    console.log(user);
+    // Check if user is a driver
+    const driver = await prisma.driver.findUnique({
+      where: { userId: user.id }
+    });
+
     return jwt.sign(
       { 
         userId: user.id,
         email: user.email,
         isAdmin: user.isAdmin,
-        isDriver: user.isDriver,
+        isDriver: !!driver
       },
       JWT_SECRET,
       { expiresIn: '1d' }
@@ -55,7 +61,16 @@ class JWTService {
         console.log('User not found for ID:', decoded.userId);
         throw new Error('User not found');
       }
-      return user;
+
+      // Add isDriver field to user object
+      const driver = await prisma.driver.findUnique({
+        where: { userId: user.id }
+      });
+      
+      return {
+        ...user,
+        isDriver: !!driver
+      };
     } catch (error) {
       console.log('Token verification error:', error.message);
       if (error.name === 'JsonWebTokenError') {
