@@ -21,4 +21,4 @@ COPY . .
 EXPOSE 4002
 
 # Command to run the application
-CMD ["node", "src/index.js"]
+CMD ["nodemon", "src/index.js"]
