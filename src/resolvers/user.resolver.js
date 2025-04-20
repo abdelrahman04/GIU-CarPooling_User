@@ -36,6 +36,13 @@ const resolvers = {
 
     revokeToken: async (_, { token }) => {
       return usersService.revokeToken(token);
+    },
+
+    deleteUser: async (_, __, context) => {
+      if (!context || !context.user) {
+        throw new Error('Not authenticated');
+      }
+      return usersService.deleteUser(context.user.id);
     }
   },
 

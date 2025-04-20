@@ -14,6 +14,49 @@ class UsersService {
     });
 
     if (existingUser) {
+      if (existingUser.isDeleted) {
+        // If user is deleted, update their information instead of creating new
+        const hashedPassword = await authService.hashPassword(password);
+        const user = await prisma.user.update({
+          where: { email },
+          data: {
+            password: hashedPassword,
+            firstName,
+            lastName,
+            giuId,
+            phone,
+            gender,
+            isAdmin: false,
+            isEmailVerified: false,
+            isDeleted: false,
+            activated: false,
+            ...(isDriver && {
+              drivers: {
+                create: {
+                  approved: false,
+                  ...(carDetails && {
+                    car: {
+                      create: {
+                        licensePlate: carDetails.licensePlate,
+                        year: carDetails.year,
+                        vehicleName: carDetails.vehicleName,
+                        passengerSeats: carDetails.passengerSeats,
+                        licensePicture: carDetails.licensePicture
+                      }
+                    }
+                  })
+                }
+              }
+            })
+          }
+        });
+
+        // Generate verification code
+        const code = await authService.generateVerificationCode(user.id, email);
+        await emailService.sendVerificationEmail(email, code);
+
+        return { message: 'Registration successful. Please check your email for verification code.' };
+      }
       throw new BadRequestException('User already exists');
     }
 
@@ -32,6 +75,7 @@ class UsersService {
         gender,
         isAdmin: false,
         isEmailVerified: false,
+        isDeleted: false,
         activated: false,
         ...(isDriver && {
           drivers: {
@@ -54,14 +98,8 @@ class UsersService {
       }
     });
 
-    
-
-    
-
     // Generate verification code
     const code = await authService.generateVerificationCode(user.id, email);
-
-    // Send verification email
     await emailService.sendVerificationEmail(email, code);
 
     return { message: 'Registration successful. Please check your email for verification code.' };
@@ -102,6 +140,10 @@ class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    if (user.isDeleted) {
+      throw new BadRequestException('Account has been deleted');
+    }
+
     // Check password
     const isPasswordValid = await authService.comparePasswords(password, user.password);
     if (!isPasswordValid) {
@@ -115,8 +157,6 @@ class UsersService {
 
     // Generate verification code for login
     const code = await authService.generateVerificationCode(user.id, email);
-
-    // Send verification email
     await emailService.sendLoginVerificationEmail(email, code);
 
     return { message: 'Login verification code sent to your email.' };
@@ -187,7 +227,32 @@ class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    if (user.isDeleted) {
+      throw new BadRequestException('Account has been deleted');
+    }
+
     return user;
+  }
+
+  async deleteUser(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isDeleted) {
+      throw new BadRequestException('Account has already been deleted');
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isDeleted: true }
+    });
+
+    return { message: 'Account deleted successfully' };
   }
 }
 

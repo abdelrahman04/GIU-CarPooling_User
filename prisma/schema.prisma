@@ -18,6 +18,7 @@ model User {
   gender           Boolean
   isAdmin          Boolean   @default(false)
   isEmailVerified  Boolean   @default(false)
+  isDeleted        Boolean   @default(false)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   activated        Boolean   @default(false)
