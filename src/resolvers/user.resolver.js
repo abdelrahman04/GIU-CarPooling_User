@@ -45,6 +45,12 @@ const resolvers = {
         where: { userId: parent.id },
         include: { car: true }
       });
+    },
+    isDriver: async (parent) => {
+      const driver = await prisma.driver.findUnique({
+        where: { userId: parent.id }
+      });
+      return !!driver;
     }
   }
 };

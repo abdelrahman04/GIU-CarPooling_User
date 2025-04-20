@@ -6,7 +6,7 @@ import prisma from '../lib/prisma.js';
 
 class UsersService {
   async register(input) {
-    const { email, password, firstName, lastName, giuId, phone, gender } = input;
+    const { email, password, firstName, lastName, giuId, phone, gender, isDriver, carDetails } = input;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -20,7 +20,7 @@ class UsersService {
     // Hash password
     const hashedPassword = await authService.hashPassword(password);
 
-    // Create user
+    // Create user with driver details if isDriver is true
     const user = await prisma.user.create({
       data: {
         email,
@@ -32,9 +32,31 @@ class UsersService {
         gender,
         isAdmin: false,
         isEmailVerified: false,
-        activated: false
+        activated: false,
+        ...(isDriver && {
+          drivers: {
+            create: {
+              approved: false,
+              ...(carDetails && {
+                car: {
+                  create: {
+                    licensePlate: carDetails.licensePlate,
+                    year: carDetails.year,
+                    vehicleName: carDetails.vehicleName,
+                    passengerSeats: carDetails.passengerSeats,
+                    licensePicture: carDetails.licensePicture
+                  }
+                }
+              })
+            }
+          }
+        })
       }
     });
+
+    
+
+    
 
     // Generate verification code
     const code = await authService.generateVerificationCode(user.id, email);
@@ -51,13 +73,21 @@ class UsersService {
     // Verify code
     await authService.verifyCode(email, code);
 
-    // Update user
-    await prisma.user.update({
+    // Update user and get the updated user
+    const user = await prisma.user.update({
       where: { email },
       data: { isEmailVerified: true }
     });
 
-    return { message: 'Email verified successfully.' };
+    // Generate tokens
+    const accessToken = await jwtService.generateAccessToken(user);
+    const refreshToken = await jwtService.generateRefreshToken(user);
+
+    return {
+      accessToken,
+      refreshToken,
+      user
+    };
   }
 
   async login(input) {

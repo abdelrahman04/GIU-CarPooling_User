@@ -9,6 +9,7 @@ type User {
   isAdmin: Boolean!
   isEmailVerified: Boolean!
   activated: Boolean!
+  isDriver: Boolean!
   createdAt: String!
   updatedAt: String!
   driver: Driver
@@ -51,6 +52,8 @@ input RegisterInput {
   giuId: String
   phone: String
   gender: Boolean!
+  isDriver: Boolean!
+  carDetails: CarDetailsInput
 }
 
 input LoginInput {
@@ -89,7 +92,7 @@ type LicenseFile {
 
 type Mutation {
   register(input: RegisterInput!): Message!
-  verifyRegistration(input: VerificationInput!): Message!
+  verifyRegistration(input: VerificationInput!): AuthResponse!
   login(input: LoginInput!): Message!
   verifyLogin(input: VerificationInput!): AuthResponse!
   refreshToken(token: String!): AuthResponse!
