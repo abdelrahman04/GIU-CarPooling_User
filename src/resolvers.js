@@ -5,6 +5,7 @@ import { driverService } from './services/driver.service.js';
 import userResolvers from './resolvers/user.resolver.js';
 import driverResolvers from './resolvers/driver.resolver.js';
 import authResolvers from './resolvers/auth.resolver.js';
+import adminResolvers from './resolvers/admin.resolver.js';
 import prisma from './lib/prisma.js';
 
 export const resolvers = {
@@ -12,6 +13,7 @@ export const resolvers = {
     ...userResolvers.Query,
     ...driverResolvers.Query,
     ...authResolvers.Query,
+    ...adminResolvers.Query,
   },
 
   Mutation: {

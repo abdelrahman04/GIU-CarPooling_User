@@ -10,6 +10,7 @@ import { authMiddleware } from './middleware/auth.js';
 import multer from 'multer';
 import { mkdir } from 'fs/promises';
 import prisma from './lib/prisma.js';
+import adminRoutes from './routes/admin.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,6 +39,9 @@ const upload = multer({ storage });
 app.use(cors());
 app.use(express.json());
 app.use(authMiddleware);
+
+// Admin routes
+app.use('/admin', adminRoutes);
 
 // File upload endpoint
 app.post('/upload-license', upload.single('file'), async (req, res) => {
@@ -98,6 +102,7 @@ async function startApolloServer() {
     typeDefs,
     resolvers,
     csrfPrevention: false, // Disable CSRF protection
+    introspection: true // Enable introspection
   });
 
   await server.start();
@@ -112,6 +117,62 @@ async function startApolloServer() {
       },
     })
   );
+
+  // Add a simple HTML page for the playground
+  app.get('/graphql', (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>GraphQL Playground</title>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphql-playground-react/build/static/css/index.css" />
+          <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/graphql-playground-react/build/favicon.png" />
+          <script src="https://cdn.jsdelivr.net/npm/graphql-playground-react/build/static/js/middleware.js"></script>
+        </head>
+        <body>
+          <div id="root">
+            <style>
+              body {
+                background-color: rgb(23, 42, 58);
+                font-family: Open Sans, sans-serif;
+                height: 90vh;
+              }
+              #root {
+                height: 100%;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .playgroundIn {
+                animation: playgroundIn 0.5s ease-out forwards;
+              }
+              @keyframes playgroundIn {
+                from {
+                  opacity: 0;
+                  transform: translateY(10px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+            </style>
+          </div>
+          <script>
+            window.addEventListener('load', function (event) {
+              GraphQLPlayground.init(document.getElementById('root'), {
+                endpoint: '/graphql',
+                settings: {
+                  'request.credentials': 'same-origin'
+                }
+              })
+            });
+          </script>
+        </body>
+      </html>
+    `);
+  });
 
   app.listen(port, () => {
     console.log(`🚀 Server ready at http://localhost:${port}/graphql`);

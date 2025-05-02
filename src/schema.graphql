@@ -83,6 +83,7 @@ type Query {
   validateRefreshToken(token: String!): Boolean!
   isAdmin(token: String!): Boolean!
   isDriver(token: String!): Boolean!
+  pendingDrivers: [User!]!
 }
 
 type LicenseFile {
