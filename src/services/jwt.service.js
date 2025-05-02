@@ -20,7 +20,8 @@ class JWTService {
         userId: user.id,
         email: user.email,
         isAdmin: user.isAdmin,
-        isDriver: !!driver
+        isDriver: !!driver,
+        gender: user.gender,
       },
       JWT_SECRET,
       { expiresIn: '1d' }
