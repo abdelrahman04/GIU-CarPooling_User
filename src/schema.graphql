@@ -84,6 +84,7 @@ type Query {
   isAdmin(token: String!): Boolean!
   isDriver(token: String!): Boolean!
   pendingDrivers: [User!]!
+  getDriverById(id: ID!): Driver!
 }
 
 type LicenseFile {

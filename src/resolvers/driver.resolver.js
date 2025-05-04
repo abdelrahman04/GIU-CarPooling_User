@@ -3,6 +3,11 @@ import prisma from '../lib/prisma.js';
 
 const resolvers = {
   Query: {
+    getDriverById: async (_, { id }) => {
+      return prisma.driver.findUnique({
+        where: { id: parseInt(id) }
+      });
+    },
     myDriverCar: async (_, __, context) => {
       if (!context || !context.user) {
         throw new Error('Not authenticated');
