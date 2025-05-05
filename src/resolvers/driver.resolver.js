@@ -4,8 +4,17 @@ import prisma from '../lib/prisma.js';
 const resolvers = {
   Query: {
     getDriverById: async (_, { id }) => {
-      return prisma.driver.findUnique({
-        where: { id: parseInt(id) }
+      return prisma.user.findUnique({
+        where: {
+          id: parseInt(id)
+        },
+        include: {
+          drivers: {
+            include: {
+              car: true
+            }
+          }
+        }
       });
     },
     myDriverCar: async (_, __, context) => {
